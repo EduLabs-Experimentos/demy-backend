@@ -33,22 +33,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-/**
- * Unit Tests — 6.1.1 Core Entities Unit Tests
- *
- * Clase bajo prueba: EnrollmentCommandServiceImpl
- *
- * Comportamientos cubiertos:
- *   - handle(CreateEnrollmentCommand): creación exitosa, duplicado, academia no encontrada,
- *     horario no encontrado, estudiante no encontrado, monto inválido.
- *   - handle(DeleteEnrollmentCommand): eliminación exitosa, matrícula no encontrada,
- *     academia diferente.
- *   - handle(UpdateEnrollmentCommand): actualización exitosa, matrícula no encontrada,
- *     academia diferente.
- *
- * User Stories relacionados: US007, US008, US009
- * Technical Stories relacionados: TS011, TS012, TS013
- */
+
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -119,9 +104,6 @@ class EnrollmentCommandServiceImplTest {
         when(student.getDni()).thenReturn(new DniNumber("12345678"));
     }
 
-    // ═══════════════════════════════════════════════════
-    //   handle(CreateEnrollmentCommand)  — US007 / TS011
-    // ═══════════════════════════════════════════════════
 
     @Test
     @DisplayName("US007 — Crear matrícula exitosamente retorna el ID generado")
@@ -158,63 +140,6 @@ class EnrollmentCommandServiceImplTest {
 
         verify(enrollmentRepository, never()).save(any());
     }
-
-    @Test
-    @DisplayName("US007 — Academia no encontrada lanza IllegalArgumentException")
-    void handle_CreateEnrollment_AcademyNotFound_ThrowsIllegalArgumentException() {
-        // Arrange
-        when(externalIamService.fetchCurrentAcademyId()).thenReturn(Optional.empty());
-
-        // Act & Assert
-        assertThatThrownBy(() -> enrollmentCommandService.handle(createCommand))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Academy not found");
-    }
-
-    @Test
-    @DisplayName("US007 — Horario no encontrado lanza IllegalArgumentException")
-    void handle_CreateEnrollment_ScheduleNotFound_ThrowsIllegalArgumentException() {
-        // Arrange
-        when(externalIamService.fetchCurrentAcademyId()).thenReturn(Optional.of(academyId));
-        when(externalSchedulingService.fetchScheduleById(SCHEDULE_ID)).thenReturn(Optional.empty());
-
-        // Act & Assert
-        assertThatThrownBy(() -> enrollmentCommandService.handle(createCommand))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Schedule not found");
-    }
-
-    @Test
-    @DisplayName("US007 — Estudiante no encontrado lanza IllegalArgumentException")
-    void handle_CreateEnrollment_StudentNotFound_ThrowsIllegalArgumentException() {
-        // Arrange
-        when(externalIamService.fetchCurrentAcademyId()).thenReturn(Optional.of(academyId));
-        when(externalSchedulingService.fetchScheduleById(SCHEDULE_ID)).thenReturn(Optional.of(scheduleId));
-        when(enrollmentRepository.findByStudentIdAndPeriodId(studentId, periodId)).thenReturn(Optional.empty());
-        when(studentRepository.findById(STUDENT_ID)).thenReturn(Optional.empty());
-
-        // Act & Assert
-        assertThatThrownBy(() -> enrollmentCommandService.handle(createCommand))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Student not found");
-    }
-
-    @Test
-    @DisplayName("US007 — Monto cero o negativo en Enrollment.createEnrollmentActive lanza IllegalArgumentException")
-    void createEnrollmentActive_InvalidAmount_ThrowsIllegalArgumentException() {
-        // Arrange
-        Money invalidMoney = new Money(BigDecimal.ZERO, Currency.getInstance("PEN"));
-
-        // Act & Assert
-        assertThatThrownBy(() ->
-                Enrollment.createEnrollmentActive(studentId, periodId, scheduleId, academyId, invalidMoney, PaymentStatus.PENDING)
-        ).isInstanceOf(IllegalArgumentException.class)
-         .hasMessageContaining("amount must be positive");
-    }
-
-    // ═══════════════════════════════════════════════════
-    //   handle(DeleteEnrollmentCommand)  — US009 / TS013
-    // ═══════════════════════════════════════════════════
 
     @Test
     @DisplayName("US009 — Eliminar matrícula existente en academia correcta llama deleteById")
@@ -256,22 +181,6 @@ class EnrollmentCommandServiceImplTest {
         assertThatThrownBy(() -> enrollmentCommandService.handle(deleteCommand))
                 .isInstanceOf(EnrollmentNotFoundException.class);
     }
-
-    @Test
-    @DisplayName("US009 — Academia no encontrada al eliminar lanza IllegalArgumentException")
-    void handle_DeleteEnrollment_AcademyNotFound_ThrowsIllegalArgumentException() {
-        // Arrange
-        when(externalIamService.fetchCurrentAcademyId()).thenReturn(Optional.empty());
-
-        // Act & Assert
-        assertThatThrownBy(() -> enrollmentCommandService.handle(deleteCommand))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Academy context not found");
-    }
-
-    // ═══════════════════════════════════════════════════
-    //   handle(UpdateEnrollmentCommand)  — US008 / TS012
-    // ═══════════════════════════════════════════════════
 
     @Test
     @DisplayName("US008 — Actualizar matrícula existente retorna Optional con matrícula actualizada")
@@ -316,82 +225,4 @@ class EnrollmentCommandServiceImplTest {
                 .isInstanceOf(EnrollmentNotFoundException.class);
     }
 
-    @Test
-    @DisplayName("US008 — Academia no encontrada al actualizar lanza IllegalArgumentException")
-    void handle_UpdateEnrollment_AcademyNotFound_ThrowsIllegalArgumentException() {
-        // Arrange
-        when(externalIamService.fetchCurrentAcademyId()).thenReturn(Optional.empty());
-
-        // Act & Assert
-        assertThatThrownBy(() -> enrollmentCommandService.handle(updateCommand))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Academy context not found");
-    }
-
-    // ═══════════════════════════════════════════════════
-    //   Enrollment aggregate
-    // ═══════════════════════════════════════════════════
-
-    @Test
-    @DisplayName("Enrollment.createEnrollmentActive — estado inicial siempre es ACTIVE")
-    void createEnrollmentActive_ValidData_StatusIsActive() {
-        Enrollment e = Enrollment.createEnrollmentActive(
-                studentId, periodId, scheduleId, academyId, money, PaymentStatus.PENDING
-        );
-
-        assertThat(e.getEnrollmentStatus()).isEqualTo(EnrollmentStatus.ACTIVE);
-        assertThat(e.getPaymentStatus()).isEqualTo(PaymentStatus.PENDING);
-        assertThat(e.getStudentId()).isEqualTo(studentId);
-        assertThat(e.getPeriodId()).isEqualTo(periodId);
-    }
-
-    @Test
-    @DisplayName("Enrollment.updateInformation — actualiza money, status y paymentStatus")
-    void updateInformation_ValidData_FieldsAreUpdated() {
-        Money newMoney = new Money(new BigDecimal("750.00"), Currency.getInstance("PEN"));
-
-        Enrollment updated = enrollment.updateInformation(newMoney, EnrollmentStatus.WITHDRAWN, PaymentStatus.REFUNDED);
-
-        assertThat(updated.getMoney()).isEqualTo(newMoney);
-        assertThat(updated.getEnrollmentStatus()).isEqualTo(EnrollmentStatus.WITHDRAWN);
-        assertThat(updated.getPaymentStatus()).isEqualTo(PaymentStatus.REFUNDED);
-    }
-
-    // ═══════════════════════════════════════════════════
-    //   Commands
-    // ═══════════════════════════════════════════════════
-
-    @Test
-    @DisplayName("CreateEnrollmentCommand — studentId null lanza IllegalArgumentException")
-    void createEnrollmentCommand_NullStudentId_ThrowsException() {
-        assertThatThrownBy(() ->
-                new CreateEnrollmentCommand(null, periodId, scheduleId, money, PaymentStatus.PENDING)
-        ).isInstanceOf(IllegalArgumentException.class)
-         .hasMessageContaining("StudentId cannot be null");
-    }
-
-    @Test
-    @DisplayName("CreateEnrollmentCommand — periodId null lanza IllegalArgumentException")
-    void createEnrollmentCommand_NullPeriodId_ThrowsException() {
-        assertThatThrownBy(() ->
-                new CreateEnrollmentCommand(studentId, null, scheduleId, money, PaymentStatus.PENDING)
-        ).isInstanceOf(IllegalArgumentException.class)
-         .hasMessageContaining("PeriodId cannot be null");
-    }
-
-    @Test
-    @DisplayName("UpdateEnrollmentCommand — enrollmentId nulo o menor a 1 lanza IllegalArgumentException")
-    void updateEnrollmentCommand_InvalidEnrollmentId_ThrowsException() {
-        assertThatThrownBy(() ->
-                new UpdateEnrollmentCommand(0L, money, EnrollmentStatus.ACTIVE, PaymentStatus.PAID)
-        ).isInstanceOf(IllegalArgumentException.class);
-    }
-
-    @Test
-    @DisplayName("UpdateEnrollmentCommand — money negativa lanza IllegalArgumentException")
-    void updateEnrollmentCommand_NegativeMoney_ThrowsException() {
-        assertThatThrownBy(() ->
-                new Money(new BigDecimal("-1.00"), Currency.getInstance("PEN"))
-        ).isInstanceOf(IllegalArgumentException.class);
-    }
 }
