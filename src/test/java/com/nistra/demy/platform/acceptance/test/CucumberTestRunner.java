@@ -9,7 +9,8 @@ import org.junit.runner.RunWith;
         features = "src/test/resources/features",
         glue = {
                 "com/nistra/demy/platform/acceptance/test/steps",
-                "com/nistra/demy/platform/institution/bdd/steps"
+                "com/nistra/demy/platform/institution/bdd/steps",
+                "com/nistra/demy/platform/enrollment/bdd/steps"
         },
         plugin = {"pretty", "html:target/cucumber.html"}
 )
