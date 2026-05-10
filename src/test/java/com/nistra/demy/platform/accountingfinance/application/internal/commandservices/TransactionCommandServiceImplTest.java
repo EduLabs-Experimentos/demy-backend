@@ -129,4 +129,34 @@ class TransactionCommandServiceImplTest {
 
         verify(transactionRepository, never()).save(any());
     }
+
+    @Test
+    @DisplayName("US026 - Actualizar ingreso/egreso existente retorna transaccion actualizada")
+    void handle_UpdateTransaction_Success_ReturnsUpdatedTransaction() {
+        // Arrange
+        when(externalIamService.fetchCurrentAcademyId()).thenReturn(Optional.of(academyId));
+        when(transactionRepository.findById(TRANSACTION_ID)).thenReturn(Optional.of(transaction));
+        when(transactionRepository.save(any(Transaction.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        // Act
+        Optional<Transaction> result = transactionCommandService.handle(updateCommand);
+
+        // Assert
+        assertThat(result)
+                .as("El servicio debe retornar la transaccion actualizada cuando pertenece a la academia actual")
+                .isPresent();
+        assertThat(result.get().getTransactionType())
+                .as("La actualizacion debe cambiar el tipo de transaccion a EXPENSE")
+                .isEqualTo(TransactionType.EXPENSE);
+        assertThat(result.get().getTransactionCategory())
+                .as("La actualizacion debe cambiar la categoria a OFFICE_SUPPLIES")
+                .isEqualTo(TransactionCategory.OFFICE_SUPPLIES);
+        assertThat(result.get().getTransactionMethod())
+                .as("La actualizacion debe cambiar el metodo a DEBIT_CARD")
+                .isEqualTo(TransactionMethod.DEBIT_CARD);
+        assertThat(result.get().getAmount())
+                .as("La actualizacion debe cambiar el monto de la transaccion")
+                .isEqualTo(expenseAmount);
+        verify(transactionRepository, times(1)).save(transaction);
+    }
 }
