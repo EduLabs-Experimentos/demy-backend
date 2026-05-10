@@ -206,4 +206,20 @@ class TransactionCommandServiceImplTest {
         // Assert
         verify(transactionRepository, times(1)).delete(transaction);
     }
+
+    @Test
+    @DisplayName("US027 - Eliminar transaccion inexistente lanza RuntimeException")
+    void handle_DeleteTransaction_NotFound_ThrowsRuntimeException() {
+        // Arrange
+        when(externalIamService.fetchCurrentAcademyId()).thenReturn(Optional.of(academyId));
+        when(transactionRepository.findById(TRANSACTION_ID)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThatThrownBy(() -> transactionCommandService.handle(deleteCommand))
+                .as("El servicio debe rechazar la eliminacion si la transaccion no existe")
+                .isInstanceOf(RuntimeException.class)
+                .hasMessage("Transaction not found with id: 1");
+
+        verify(transactionRepository, never()).delete(any(Transaction.class));
+    }
 }
