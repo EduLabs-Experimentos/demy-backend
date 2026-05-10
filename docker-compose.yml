@@ -1,0 +1,58 @@
+version: '3.9'
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: demy-db
+    environment:
+      MYSQL_DATABASE: demy_database
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3307:3306"
+    volumes:
+      - demy-db-volume:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - demy-network
+
+  backend:
+    build: .
+    container_name: demy-api
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/demy_database?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - JWT_SECRET=123123123
+      - JWT_EXPIRATION_DAYS=7
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_DATABASE=demy_database
+      - DB_USERNAME=root
+      - DB_PASSWORD=root
+      - DOCUMENTATION_CONTACT_NAME=Demy Team
+      - DOCUMENTATION_CONTACT_EMAIL=contact@demy.com
+      - EMAIL_USER=your-email@gmail.com
+      - EMAIL_PASS=your-app-password
+      - EMAIL_FROM_ADDRESS=noreply@demy.com
+      - EMAIL_FROM_NAME=Demy Platform
+    networks:
+      - demy-network
+    restart: unless-stopped
+
+volumes:
+  demy-db-volume:
+
+networks:
+  demy-network:
+    driver: bridge
