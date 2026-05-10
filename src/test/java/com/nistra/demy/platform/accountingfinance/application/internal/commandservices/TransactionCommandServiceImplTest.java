@@ -192,4 +192,18 @@ class TransactionCommandServiceImplTest {
 
         verify(transactionRepository, never()).save(any());
     }
+
+    @Test
+    @DisplayName("US027 - Eliminar ingreso/egreso existente llama delete")
+    void handle_DeleteTransaction_Success_CallsDelete() {
+        // Arrange
+        when(externalIamService.fetchCurrentAcademyId()).thenReturn(Optional.of(academyId));
+        when(transactionRepository.findById(TRANSACTION_ID)).thenReturn(Optional.of(transaction));
+
+        // Act
+        transactionCommandService.handle(deleteCommand);
+
+        // Assert
+        verify(transactionRepository, times(1)).delete(transaction);
+    }
 }
