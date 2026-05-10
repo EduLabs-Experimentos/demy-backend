@@ -222,4 +222,21 @@ class TransactionCommandServiceImplTest {
 
         verify(transactionRepository, never()).delete(any(Transaction.class));
     }
+
+    @Test
+    @DisplayName("US027 - Eliminar transaccion de otra academia lanza RuntimeException")
+    void handle_DeleteTransaction_DifferentAcademy_ThrowsRuntimeException() {
+        // Arrange
+        AcademyId otherAcademy = new AcademyId(99L);
+        when(externalIamService.fetchCurrentAcademyId()).thenReturn(Optional.of(otherAcademy));
+        when(transactionRepository.findById(TRANSACTION_ID)).thenReturn(Optional.of(transaction));
+
+        // Act & Assert
+        assertThatThrownBy(() -> transactionCommandService.handle(deleteCommand))
+                .as("El servicio debe impedir eliminar una transaccion de otra academia")
+                .isInstanceOf(RuntimeException.class)
+                .hasMessage("Transaction does not belong to the current academy");
+
+        verify(transactionRepository, never()).delete(any(Transaction.class));
+    }
 }
