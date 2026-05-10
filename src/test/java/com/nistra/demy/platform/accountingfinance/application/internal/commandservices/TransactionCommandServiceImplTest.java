@@ -159,4 +159,20 @@ class TransactionCommandServiceImplTest {
                 .isEqualTo(expenseAmount);
         verify(transactionRepository, times(1)).save(transaction);
     }
+
+    @Test
+    @DisplayName("US026 - Actualizar transaccion inexistente lanza RuntimeException")
+    void handle_UpdateTransaction_NotFound_ThrowsRuntimeException() {
+        // Arrange
+        when(externalIamService.fetchCurrentAcademyId()).thenReturn(Optional.of(academyId));
+        when(transactionRepository.findById(TRANSACTION_ID)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThatThrownBy(() -> transactionCommandService.handle(updateCommand))
+                .as("El servicio debe rechazar la actualizacion si la transaccion no existe")
+                .isInstanceOf(RuntimeException.class)
+                .hasMessage("Transaction not found with id: 1");
+
+        verify(transactionRepository, never()).save(any());
+    }
 }
