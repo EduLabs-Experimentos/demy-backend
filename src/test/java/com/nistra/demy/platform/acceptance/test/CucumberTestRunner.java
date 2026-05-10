@@ -10,7 +10,10 @@ import org.junit.runner.RunWith;
         glue = {
                 "com/nistra/demy/platform/acceptance/test/steps",
                 "com/nistra/demy/platform/institution/bdd/steps",
-                "com/nistra/demy/platform/enrollment/bdd/steps"
+                "com/nistra/demy/platform/enrollment/bdd/steps",
+                "com/nistra/demy/platform/iam/stepdefinitions",
+                "com/nistra/demy/platform/institution/stepdefinitions",
+                "com/nistra/demy/platform/scheduling/stepdefinitions"
         },
         plugin = {"pretty", "html:target/cucumber.html"}
 )
