@@ -152,4 +152,40 @@ class TransactionsControllerIntegrationTest {
                 .andExpect(jsonPath("$", hasSize(1)))
                 .andExpect(jsonPath("$[0].transactionType").value("INCOME"));
     }
+
+    @Test
+    @DisplayName("TS051 - PUT /transactions/{id} con datos validos retorna 200 OK")
+    void updateTransaction_ValidRequest_Returns200() throws Exception {
+        // Arrange
+        UpdateTransactionResource resource = new UpdateTransactionResource(
+                "expense",
+                "office supplies",
+                "debit card",
+                new BigDecimal("80.00"),
+                "PEN",
+                "Compra de utiles de oficina",
+                LocalDate.of(2026, 5, 10)
+        );
+        sampleTransaction.updateTransaction(new UpdateTransactionCommand(
+                TRANSACTION_ID,
+                "expense",
+                "office supplies",
+                "debit card",
+                new Money(new BigDecimal("80.00"), Currency.getInstance("PEN")),
+                "Compra de utiles de oficina",
+                LocalDate.of(2026, 5, 10)
+        ));
+        when(transactionCommandService.handle(any(UpdateTransactionCommand.class)))
+                .thenReturn(Optional.of(sampleTransaction));
+
+        // Act & Assert
+        mockMvc.perform(put("/api/v1/transactions/{id}", TRANSACTION_ID)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(resource)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.transactionType").value("EXPENSE"))
+                .andExpect(jsonPath("$.transactionCategory").value("OFFICE_SUPPLIES"))
+                .andExpect(jsonPath("$.transactionMethod").value("DEBIT_CARD"))
+                .andExpect(jsonPath("$.amount").value(80.00));
+    }
 }
