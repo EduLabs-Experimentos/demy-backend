@@ -11,8 +11,8 @@ public class CurrentAcademyResourceFromEntityAssembler {
                 entity.getStreetAddress().district(),
                 entity.getStreetAddress().province(),
                 entity.getStreetAddress().department(),
-                entity.getEmailAddress().email(),
                 entity.getPhoneNumber().getFullNumber(),
+                entity.getEmailAddress().email(),
                 entity.getRuc().ruc()
         );
     }
