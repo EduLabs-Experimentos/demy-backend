@@ -111,4 +111,19 @@ class TransactionsControllerIntegrationTest {
 
         verify(transactionCommandService, times(1)).handle(any(RegisterTransactionCommand.class));
     }
+
+    @Test
+    @DisplayName("TS054 - GET /transactions/{id} con ID existente retorna 200 OK")
+    void getTransactionById_ExistingId_Returns200() throws Exception {
+        // Arrange
+        when(transactionQueryService.handle(any(GetTransactionByIdQuery.class)))
+                .thenReturn(Optional.of(sampleTransaction));
+
+        // Act & Assert
+        mockMvc.perform(get("/api/v1/transactions/{id}", TRANSACTION_ID))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.transactionType").value("INCOME"))
+                .andExpect(jsonPath("$.transactionCategory").value("STUDENT_ENROLLMENT"))
+                .andExpect(jsonPath("$.currency").value("PEN"));
+    }
 }
