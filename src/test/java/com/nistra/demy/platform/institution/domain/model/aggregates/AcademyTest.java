@@ -7,12 +7,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
-/**
- * Unit tests for the Academy aggregate using the Arrange-Act-Assert (AAA) pattern.
- * Compatible with the actual VO implementations: StreetAddress, PhoneNumber, AdministratorId.
- */
 class AcademyTest {
 
     @Test
@@ -20,12 +15,11 @@ class AcademyTest {
     void shouldCreateAcademyWithConstructor() {
         // Arrange
         AcademyName name = new AcademyName("Instituto Nistra");
-        AcademyDescription description = new AcademyDescription("Academia dedicada a la formación tecnológica.");
+        AcademyDescription description = new AcademyDescription("Academia dedicada a la formacion tecnologica.");
         StreetAddress address = new StreetAddress("Av. Arequipa 1234", "Miraflores", "Lima", "Lima");
         EmailAddress email = new EmailAddress("info@nistra.com");
         PhoneNumber phone = new PhoneNumber("+51", "987654321");
         Ruc ruc = new Ruc("10456789123");
-        AdministratorId administratorId = new AdministratorId(1001L);
 
         // Act
         Academy academy = new Academy(name, description, address, email, phone, ruc);
@@ -33,7 +27,7 @@ class AcademyTest {
         // Assert
         assertNotNull(academy);
         assertEquals("Instituto Nistra", academy.getAcademyName().name());
-        assertEquals("Academia dedicada a la formación tecnológica.", academy.getAcademyDescription().description());
+        assertEquals("Academia dedicada a la formacion tecnologica.", academy.getAcademyDescription().description());
         assertEquals("Av. Arequipa 1234", academy.getStreetAddress().street());
         assertEquals("Miraflores", academy.getStreetAddress().district());
         assertEquals("Lima", academy.getStreetAddress().province());
@@ -42,8 +36,7 @@ class AcademyTest {
         assertEquals("+51", academy.getPhoneNumber().countryCode());
         assertEquals("987654321", academy.getPhoneNumber().phone());
         assertEquals("10456789123", academy.getRuc().ruc());
-        assertEquals(1001L, academy.getAdministratorId().administratorId());
-        assertNotNull(academy.getAdministratorId(), "El ID del administrador debe inicializarse (aunque sea null).");
+        assertNull(academy.getAdministratorId());
     }
 
     @Test
@@ -52,7 +45,7 @@ class AcademyTest {
         // Arrange
         RegisterAcademyCommand command = new RegisterAcademyCommand(
                 new AcademyName("Academia Demy"),
-                new AcademyDescription("Formación profesional para jóvenes."),
+                new AcademyDescription("Formacion profesional para jovenes."),
                 new StreetAddress("Jr. Los Robles 567", "San Isidro", "Lima", "Lima"),
                 new EmailAddress("contacto@demy.com"),
                 new PhoneNumber("+51", "999999999"),
@@ -66,11 +59,11 @@ class AcademyTest {
         // Assert
         assertNotNull(academy);
         assertEquals("Academia Demy", academy.getAcademyName().name());
-        assertEquals("Formación profesional para jóvenes.", academy.getAcademyDescription().description());
+        assertEquals("Formacion profesional para jovenes.", academy.getAcademyDescription().description());
         assertEquals("Jr. Los Robles 567", academy.getStreetAddress().street());
         assertEquals("contacto@demy.com", academy.getEmailAddress().email());
         assertEquals("10987654321", academy.getRuc().ruc());
-        assertEquals(1001L, academy.getAdministratorId().administratorId());
+        assertNull(academy.getAdministratorId());
     }
 
     @Test
@@ -85,7 +78,6 @@ class AcademyTest {
                 new PhoneNumber("+51", "911111111"),
                 new Ruc("10765432109")
         );
-
         AdministratorId admin1 = new AdministratorId(1L);
 
         // Act
@@ -95,23 +87,26 @@ class AcademyTest {
         assertTrue(academy.getAdministratorId().isAssigned());
         assertEquals(1L, academy.getAdministratorId().administratorId());
 
-        // Act & Assert (segunda asignación debe fallar)
+        // Arrange
         AdministratorId admin2 = new AdministratorId(2L);
+
+        // Act & Assert
         IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
             academy.assignAdministrator(admin2);
         });
-
         assertEquals("Administrator is already assigned to this academy", exception.getMessage());
     }
 
     @Test
     @DisplayName("Should throw an exception if the AdministratorId is invalid (<= 0)")
     void shouldThrowExceptionForInvalidAdministratorId() {
-        // Arrange & Act & Assert
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            new AdministratorId(0L);
-        });
+        // Arrange
+        Long invalidId = 0L;
 
+        // Act & Assert
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            new AdministratorId(invalidId);
+        });
         assertEquals("Administrator ID must be greater than zero if provided", exception.getMessage());
     }
 
