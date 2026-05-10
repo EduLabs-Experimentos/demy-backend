@@ -114,4 +114,19 @@ class TransactionCommandServiceImplTest {
                 .isEqualTo(TransactionMethod.BANK_TRANSFER);
         verify(transactionRepository, times(1)).save(any(Transaction.class));
     }
+
+    @Test
+    @DisplayName("US025 - Registrar transaccion sin academia actual lanza RuntimeException")
+    void handle_RegisterTransaction_NoAcademy_ThrowsRuntimeException() {
+        // Arrange
+        when(externalIamService.fetchCurrentAcademyId()).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThatThrownBy(() -> transactionCommandService.handle(registerCommand))
+                .as("El servicio debe rechazar el registro si no existe una academia actual")
+                .isInstanceOf(RuntimeException.class)
+                .hasMessage("No academy found");
+
+        verify(transactionRepository, never()).save(any());
+    }
 }
