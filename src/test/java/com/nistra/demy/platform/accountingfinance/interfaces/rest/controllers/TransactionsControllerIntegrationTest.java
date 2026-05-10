@@ -188,4 +188,17 @@ class TransactionsControllerIntegrationTest {
                 .andExpect(jsonPath("$.transactionMethod").value("DEBIT_CARD"))
                 .andExpect(jsonPath("$.amount").value(80.00));
     }
+
+    @Test
+    @DisplayName("TS052 - DELETE /transactions/{id} exitoso retorna 204 No Content")
+    void deleteTransaction_ExistingId_Returns204() throws Exception {
+        // Arrange
+        doNothing().when(transactionCommandService).handle(any(DeleteTransactionCommand.class));
+
+        // Act & Assert
+        mockMvc.perform(delete("/api/v1/transactions/{id}", TRANSACTION_ID))
+                .andExpect(status().isNoContent());
+
+        verify(transactionCommandService, times(1)).handle(any(DeleteTransactionCommand.class));
+    }
 }
