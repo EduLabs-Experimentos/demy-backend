@@ -175,4 +175,21 @@ class TransactionCommandServiceImplTest {
 
         verify(transactionRepository, never()).save(any());
     }
+
+    @Test
+    @DisplayName("US026 - Actualizar transaccion de otra academia lanza RuntimeException")
+    void handle_UpdateTransaction_DifferentAcademy_ThrowsRuntimeException() {
+        // Arrange
+        AcademyId otherAcademy = new AcademyId(99L);
+        when(externalIamService.fetchCurrentAcademyId()).thenReturn(Optional.of(otherAcademy));
+        when(transactionRepository.findById(TRANSACTION_ID)).thenReturn(Optional.of(transaction));
+
+        // Act & Assert
+        assertThatThrownBy(() -> transactionCommandService.handle(updateCommand))
+                .as("El servicio debe impedir actualizar una transaccion de otra academia")
+                .isInstanceOf(RuntimeException.class)
+                .hasMessage("Transaction does not belong to the current academy");
+
+        verify(transactionRepository, never()).save(any());
+    }
 }
