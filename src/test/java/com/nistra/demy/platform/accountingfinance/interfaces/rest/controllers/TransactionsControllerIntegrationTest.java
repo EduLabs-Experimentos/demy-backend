@@ -126,4 +126,16 @@ class TransactionsControllerIntegrationTest {
                 .andExpect(jsonPath("$.transactionCategory").value("STUDENT_ENROLLMENT"))
                 .andExpect(jsonPath("$.currency").value("PEN"));
     }
+
+    @Test
+    @DisplayName("TS054 - GET /transactions/{id} con ID inexistente retorna 404 Not Found")
+    void getTransactionById_NonExistingId_Returns404() throws Exception {
+        // Arrange
+        when(transactionQueryService.handle(any(GetTransactionByIdQuery.class)))
+                .thenReturn(Optional.empty());
+
+        // Act & Assert
+        mockMvc.perform(get("/api/v1/transactions/{id}", 9999L))
+                .andExpect(status().isNotFound());
+    }
 }
