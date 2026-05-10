@@ -1,4 +1,4 @@
-package com.nistra.demy.platform.acceptance.test.steps;
+package com.nistra.demy.platform.institution.bdd.steps;
 
 import com.nistra.demy.platform.institution.domain.model.aggregates.Administrator;
 import com.nistra.demy.platform.institution.domain.model.commands.RegisterAdministratorCommand;
