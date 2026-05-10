@@ -138,4 +138,18 @@ class TransactionsControllerIntegrationTest {
         mockMvc.perform(get("/api/v1/transactions/{id}", 9999L))
                 .andExpect(status().isNotFound());
     }
+
+    @Test
+    @DisplayName("TS053 - GET /transactions retorna lista de movimientos contables")
+    void getAllTransactions_ReturnsTransactionList() throws Exception {
+        // Arrange
+        when(transactionQueryService.handle(any(GetAllTransactionsQuery.class)))
+                .thenReturn(List.of(sampleTransaction));
+
+        // Act & Assert
+        mockMvc.perform(get("/api/v1/transactions"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].transactionType").value("INCOME"));
+    }
 }
