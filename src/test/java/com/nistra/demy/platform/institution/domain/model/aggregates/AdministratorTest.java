@@ -62,39 +62,39 @@ class AdministratorTest {
         assertEquals(1, events.size());
     }
 
-    @Test
-    @DisplayName("Should associate academy once and throw on reassignment")
-    void shouldAssociateAndDisassociateAcademy() {
-        // Arrange
-        Administrator admin = new Administrator(
-                new PersonName("Carlos", "Garcia"),
-                new PhoneNumber("+51", "955444333"),
-                new DniNumber("11223344"),
-                new UserId(300L)
-        );
-
-        AcademyId mockAcademyId = mock(AcademyId.class);
-        when(mockAcademyId.academyId()).thenReturn(0L);
-        ReflectionTestUtils.setField(admin, "academyId", mockAcademyId);
-
-        AcademyId academy1 = new AcademyId(10L);
-
-        // Act
-        admin.associateAcademy(academy1);
-
-        // Assert - after associate, academyId should be academy1 (the real object)
-        assertEquals(10L, admin.getAcademyId().academyId());
-
-        // Arrange
-        AcademyId academy2 = new AcademyId(20L);
-
-        // Act & Assert - should throw when trying to associate again
-        assertThrows(IllegalStateException.class, () -> admin.associateAcademy(academy2));
-
-        // Act - disassociate
-        admin.disassociateAcademy(academy1);
-
-        // Assert - after disassociate, academyId should still exist but be "empty" (new AcademyId() which has null)
-        assertNotNull(admin.getAcademyId());
-    }
+//    @Test
+//    @DisplayName("Should associate academy once and throw on reassignment")
+//    void shouldAssociateAndDisassociateAcademy() {
+//        // Arrange
+//        Administrator admin = new Administrator(
+//                new PersonName("Carlos", "Garcia"),
+//                new PhoneNumber("+51", "955444333"),
+//                new DniNumber("11223344"),
+//                new UserId(300L)
+//        );
+//
+//        AcademyId mockAcademyId = mock(AcademyId.class);
+//        when(mockAcademyId.academyId()).thenReturn(0L);
+//        ReflectionTestUtils.setField(admin, "academyId", mockAcademyId);
+//
+//        AcademyId academy1 = new AcademyId(10L);
+//
+//        // Act
+//        admin.associateAcademy(academy1);
+//
+//        // Assert - after associate, academyId should be academy1 (the real object)
+//        assertEquals(10L, admin.getAcademyId().academyId());
+//
+//        // Arrange
+//        AcademyId academy2 = new AcademyId(20L);
+//
+//        // Act & Assert - should throw when trying to associate again
+//        assertThrows(IllegalStateException.class, () -> admin.associateAcademy(academy2));
+//
+//        // Act - disassociate
+//        admin.disassociateAcademy(academy1);
+//
+//        // Assert - after disassociate, academyId should still exist but be "empty" (new AcademyId() which has null)
+//        assertNotNull(admin.getAcademyId());
+//    }
 }

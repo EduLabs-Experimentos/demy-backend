@@ -7,6 +7,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.domain.AbstractAggregateRoot;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.util.Collection;
 import java.util.Date;
 
 /**
@@ -38,5 +39,12 @@ public abstract class AuditableAbstractAggregateRoot<T extends AbstractAggregate
      */
     public void addDomainEvent(Object event) {
         super.registerEvent(event);
+    }
+
+    /**
+     * exposes the domain events in order to validate them in unit tests.
+     */
+    public Collection<Object> getDomainEvents() {
+        return super.domainEvents(); // Llama al metodo protected de Spring
     }
 }
