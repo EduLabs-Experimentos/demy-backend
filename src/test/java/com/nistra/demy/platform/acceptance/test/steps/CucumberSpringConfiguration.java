@@ -1,9 +1,11 @@
 package com.nistra.demy.platform.acceptance.test.steps;
 
 import io.cucumber.spring.CucumberContextConfiguration;
-import org.springframework.test.context.ContextConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 @CucumberContextConfiguration
-@ContextConfiguration
+@SpringBootTest
+@ActiveProfiles("test")
 public class CucumberSpringConfiguration {
 }
