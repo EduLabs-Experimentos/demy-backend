@@ -1,18 +1,21 @@
-Feature: Administrator Registration
+Feature: Registro de Administrador
+  Para gestionar la institución y sus miembros
+  Como dueño del sistema
+  Quiero registrar un administrador
 
-  Scenario: Successful administrator registration
-    Given the academy service is available
-    When the client sends a registration request with:
-      | firstName | lastName | phoneCountryCode | phoneNumber | dniNumber |  userId |
-      | Paul      | Sulca    | +51              | 987654321   | 12345678  |  10     |
-    Then the response should have status code 201
-    And the body should contain "Administrator registered successfully"
+  Scenario Outline: Validar reglas de negocio al registrar un administrador
+    When intento registrar un administrador con nombre "<nombre>", apellido "<apellido>", dni "<dni>", celular "<telefono>" y userId <userId>
+    Then el registro del administrador debe validarse con
+      | firstName | <nombre>   |
+      | lastName  | <apellido> |
+      | dni       | <dni>      |
+      | phone     | <telefono> |
+      | userId    | <userId>   |
+    And el resultado del registro de admin es "<mensaje>"
 
-  Scenario: Failed registration with invalid data
-    Given the academy service is available
-    When the client sends a registration request with:
-      | firstName | lastName | phoneCountryCode | phoneNumber | dniNumber |  userId |
-      | (empty)   | Sulca    | +51              | abcde       | 00000000  |  10     |
-    Then the response should have status code 400
-    And the response body should contain key "errors"
-    And the response body's "errors" should include "Invalid phone number format"
+    Examples:
+      | nombre | apellido | dni      | telefono  | userId | mensaje     |
+      | Diego  | Vilca    | 76543210 | 999888777 | 10     | Test Passed |
+      |        | Vilca    | 76543210 | 999888777 | 10     | Error       |
+      | Salim  | Ramirez  | 123      | 999888777 | 15     | Error       |
+      | Paul   | Sulca    | 12345678 | 987654321 | -5     | Error       |

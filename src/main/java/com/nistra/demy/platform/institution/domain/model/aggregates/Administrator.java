@@ -64,7 +64,7 @@ public class Administrator extends AuditableAbstractAggregateRoot<Administrator>
     }
 
     public void associateAcademy(AcademyId academyId) {
-        if (this.academyId == null || this.academyId.academyId() == 0) {
+        if (this.academyId == null || this.academyId.academyId() == null) {
             this.academyId = academyId;
         } else {
             throw new IllegalStateException("Administrator is already associated with an academy.");
