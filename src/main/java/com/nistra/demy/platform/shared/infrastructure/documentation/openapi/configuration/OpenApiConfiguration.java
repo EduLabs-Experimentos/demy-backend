@@ -64,7 +64,7 @@ public class OpenApiConfiguration {
         return new OpenAPI()
                 .openapi("3.0.1")
                 .info(info)
-                .servers(List.of(new Server().url("https://nistra-demy.up.railway.app")))
+                .servers(List.of(new Server().url("https://demy-experimentos-backend-production.up.railway.app")))
                 .addSecurityItem(securityRequirement)
                 .components(new Components()
                         .addSecuritySchemes("Bearer Authentication", jwtSecurityScheme));
