@@ -1,0 +1,18 @@
+blank_issues_enabled: false
+
+contact_links:
+  - name: Team Discord
+    url: https://discord.gg/6TFrJXD3
+    about: Use this channel to coordinate PRs, blockers, and reviews.
+
+  - name: Contributing Guide
+    url: https://github.com/nistrahq/demy-api/blob/main/CONTRIBUTING.md
+    about: Learn how to branch, commit, test, and open PRs.
+
+  - name: Project Documentation
+    url: https://github.com/nistrahq/demy-api/tree/develop/docs
+    about: Architecture, API (OpenAPI), guides, diagrams.
+
+  - name: Security Policy
+    url: https://github.com/nistrahq/demy-api/blob/main/SECURITY.md
+    about: Report vulnerabilities privately.
