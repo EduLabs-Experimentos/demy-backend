@@ -1,5 +1,7 @@
 package com.nistra.demy.platform.enrollment.interfaces.rest.controllers;
 
+import com.microsoft.applicationinsights.TelemetryClient;
+import org.springframework.beans.factory.annotation.Autowired;
 import com.nistra.demy.platform.enrollment.domain.model.commands.DeleteEnrollmentCommand;
 import com.nistra.demy.platform.enrollment.domain.model.queries.GetAllEnrollmentsByStudentDniQuery;
 import com.nistra.demy.platform.enrollment.domain.model.queries.GetAllEnrollmentsByStudentIdQuery;
@@ -23,7 +25,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -34,6 +38,8 @@ public class EnrollmentsController {
 
     private final EnrollmentCommandService enrollmentCommandService;
     private final EnrollmentQueryService enrollmentQueryService;
+
+    private final TelemetryClient telemetryClient = new TelemetryClient();
 
     public EnrollmentsController(
             EnrollmentCommandService enrollmentCommandService,
@@ -66,6 +72,20 @@ public class EnrollmentsController {
 
         var enrollmentEntity = enrollment.get();
         var enrollmentResource = EnrollmentResourceFromEntityAssembler.toResourceFromEntity(enrollmentEntity);
+
+        try {
+            Map<String, String> properties = new HashMap<>();
+            properties.put("enrollmentId", String.valueOf(enrollmentId));
+            properties.put("module", "Enrollment");
+            properties.put("source", "AdminWeb");
+
+            // Enviamos el evento con el nombre que definimos en la sección 8.2.8
+            telemetryClient.trackEvent("admin_enrollment_submit", properties, null);
+        } catch (Exception e) {
+            // Un try-catch silencioso para que si falla la telemetría, no tumbe la matrícula del alumno
+            System.out.println("No se pudo enviar telemetría a Azure: " + e.getMessage());
+        }
+
         return new ResponseEntity<>(enrollmentResource, HttpStatus.CREATED);
     }
 
