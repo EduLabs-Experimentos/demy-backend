@@ -19,6 +19,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.microsoft.applicationinsights.TelemetryClient;
+import java.util.HashMap;
+import java.util.Map;
 
 import java.util.List;
 
@@ -31,6 +34,8 @@ public class TransactionsController {
 
     private final TransactionCommandService transactionCommandService;
     private final TransactionQueryService transactionQueryService;
+
+    private final TelemetryClient telemetryClient = new TelemetryClient();
 
     public TransactionsController(
             TransactionCommandService transactionCommandService,
@@ -55,6 +60,17 @@ public class TransactionsController {
         if (transaction.isEmpty()) return ResponseEntity.badRequest().build();
         var transactionEntity = transaction.get();
         var transactionResource = TransactionResourceFromEntityAssembler.toResourceFromEntity(transactionEntity);
+
+        try {
+            Map<String, String> properties = new HashMap<>();
+            properties.put("module", "Finance_Ledger");
+            properties.put("source", "AdminWeb_ManualEntry");
+
+            telemetryClient.trackEvent("admin_finance_entry_save", properties, null);
+        } catch (Exception e) {
+            System.out.println("Error en telemetría de transacciones: " + e.getMessage());
+        }
+
         return new ResponseEntity<>(transactionResource, HttpStatus.CREATED);
     }
 

@@ -19,6 +19,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.microsoft.applicationinsights.TelemetryClient;
+import java.util.HashMap;
+import java.util.Map;
 
 import java.util.List;
 
@@ -31,6 +34,8 @@ public class BillingAccountsController {
 
     private final BillingAccountCommandService billingAccountCommandService;
     private final BillingAccountQueryService billingAccountQueryService;
+
+    private final TelemetryClient telemetryClient = new TelemetryClient();
 
     public  BillingAccountsController(
             BillingAccountCommandService billingAccountCommandService,
@@ -79,6 +84,17 @@ public class BillingAccountsController {
         if (billingAccount.isEmpty()) return ResponseEntity.badRequest().build();
         var billingAccountEntity = billingAccount.get();
         var billingAccountResource = BillingAccountResourceFromEntityAssembler.toResourceFromEntity(billingAccountEntity);
+
+        try {
+            Map<String, String> properties = new HashMap<>();
+            properties.put("billingAccountId", String.valueOf(billingAccountId));
+            properties.put("module", "Finance_Billing");
+
+            telemetryClient.trackEvent("admin_invoice_create", properties, null);
+        } catch (Exception e) {
+            System.out.println("Error en telemetría de facturación: " + e.getMessage());
+        }
+
         return new ResponseEntity<>(billingAccountResource, HttpStatus.CREATED);
     }
 
