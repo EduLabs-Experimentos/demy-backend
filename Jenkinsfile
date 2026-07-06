@@ -39,7 +39,7 @@ pipeline {
 
         stage('Deploy to Azure') {
             when {
-                branch 'main'
+                expression { env.GIT_BRANCH == 'origin/main' }
             }
             steps {
                 withCredentials([
