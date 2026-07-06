@@ -79,7 +79,7 @@ public class EnrollmentsController {
             properties.put("module", "Enrollment");
             properties.put("source", "AdminWeb");
 
-            // Enviamos el evento con el nombre que definimos en la sección 8.2.8
+            // Envia el evento
             telemetryClient.trackEvent("admin_enrollment_submit", properties, null);
         } catch (Exception e) {
             // Un try-catch silencioso para que si falla la telemetría, no tumbe la matrícula del alumno
